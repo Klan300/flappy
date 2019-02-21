@@ -1,5 +1,7 @@
 import arcade
 from coldetect import check_player_pillar_collision
+from random import randint
+
 
 class Player:
     STATE_FROZEN = 1
@@ -24,6 +26,7 @@ class Player:
 class World:
     STATE_FROZEN = 1
     STATE_STARTED = 2
+    STATE_DEAD = 3
 
     def __init__(self, width, height):
         self.width = width
@@ -33,15 +36,15 @@ class World:
         self.pillar_pair = PillarPair(self, width - 100, height // 2)
  
     def update(self, delta):
-        if self.state == World.STATE_FROZEN:
-            return 
+        if self.state in [World.STATE_FROZEN, World.STATE_DEAD]:
+            return
+ 
         self.player.update(delta)
-        self.vy = Player.STARTING_VELOCITY
         self.pillar_pair.update(delta)
-
+ 
         if self.pillar_pair.hit(self.player):
-            self.state = self.STATE_FROZEN
-            self.player.x = 
+            self.die()
+            
 
 
     def on_key_press(self, key, key_modifiers):
@@ -56,6 +59,13 @@ class World:
     def is_started(self):
         return self.state == World.STATE_STARTED
 
+    def die(self):
+        self.state = World.STATE_DEAD
+ 
+    def is_dead(self):
+        return self.state == World.STATE_DEAD
+
+
 
 
 class PillarPair:
@@ -64,15 +74,20 @@ class PillarPair:
     def __init__(self, world, x, y):
         self.world = world
         self.x = x
-        self.y = y
+        self.y = randint(200,400)
  
     def update(self, delta):
         self.x -= PillarPair.PILLAR_SPEED
 
         if self.x == -20:
             self.x = 800
+            self.random_position_y()
     
     def hit(self, player):
         return check_player_pillar_collision(player.x, player.y,
                                              self.x, self.y)
+
+    def random_position_y(self):
+        self.y = randint(200,400)
+        
 
